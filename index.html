@@ -26,10 +26,10 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans antialiased pb-10">
+<body class="bg-gray-900 text-gray-200 font-sans antialiased pb-10">
 
     <!-- Header Moderno con Gradiente y bordes redondeados abajo -->
-    <header class="bg-gradient-to-br from-blue-800 to-indigo-900 text-white shadow-lg rounded-b-[2rem] pb-10 pt-8 px-4 relative z-10">
+    <header class="bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-lg rounded-b-[2rem] pb-10 pt-8 px-4 relative z-10">
         <div class="max-w-md mx-auto">
             <h1 class="text-2xl font-extrabold text-center tracking-tight">🏆 Mundial Tracker</h1>
             <p class="text-blue-200 text-center text-sm mt-1 opacity-90">Tu progreso guardado localmente</p>
@@ -38,9 +38,9 @@
 
     <!-- Navegación estilo "Píldora" (Flotante) -->
     <div class="max-w-md mx-auto px-4 relative z-20 -mt-7 mb-6">
-        <nav class="bg-white p-1.5 rounded-full shadow-md flex justify-between items-center ring-1 ring-gray-100">
-            <button onclick="switchTab('partidos')" id="tab-partidos" class="w-1/2 py-2.5 rounded-full text-sm font-bold bg-blue-100 text-blue-800 shadow-sm transition-all">📅 Partidos</button>
-            <button onclick="switchTab('grupos')" id="tab-grupos" class="w-1/2 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:text-blue-600 transition-all">📊 Grupos</button>
+        <nav class="bg-gray-800 p-1.5 rounded-full shadow-md flex justify-between items-center ring-1 ring-gray-700">
+            <button onclick="switchTab('partidos')" id="tab-partidos" class="w-1/2 py-2.5 rounded-full text-sm font-bold bg-blue-600 text-white shadow-sm transition-all">📅 Partidos</button>
+            <button onclick="switchTab('grupos')" id="tab-grupos" class="w-1/2 py-2.5 rounded-full text-sm font-bold text-gray-400 hover:text-blue-300 transition-all">📊 Grupos</button>
         </nav>
     </div>
 
@@ -50,8 +50,8 @@
         <!-- SECCIÓN 1: Calendario -->
         <section id="partidos" class="tab-content active">
             <div class="flex justify-between items-center mb-4 px-1">
-                <h2 class="text-xl font-bold text-gray-800">Fase de Grupos</h2>
-                <button onclick="resetData()" class="text-xs font-semibold text-red-500 bg-red-50 px-3 py-1.5 rounded-full hover:bg-red-100 active:scale-95 transition-transform">Borrar todo</button>
+                <h2 class="text-xl font-bold text-gray-100">Fase de Grupos</h2>
+                <button onclick="resetData()" class="text-xs font-semibold text-red-400 bg-red-900/30 px-3 py-1.5 rounded-full hover:bg-red-900/50 active:scale-95 transition-transform">Borrar todo</button>
             </div>
             
             <!-- Contenedor de Partidos -->
@@ -62,7 +62,7 @@
 
         <!-- SECCIÓN 2: Tablas de Grupos -->
         <section id="grupos" class="tab-content">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 px-1">Clasificación General</h2>
+            <h2 class="text-xl font-bold text-gray-100 mb-4 px-1">Clasificación General</h2>
             <div id="standings-container" class="space-y-6">
                 <!-- Inyectado por JS -->
             </div>
@@ -173,48 +173,48 @@
             data.forEach(match => {
                 const isWatched = match.watched;
                 const card = document.createElement('div');
-                // Estilos de tarjeta moderna
-                card.className = `bg-white rounded-3xl shadow-sm p-5 relative overflow-hidden transition-all duration-300 ${isWatched ? 'ring-2 ring-green-400 bg-green-50/20' : 'border border-gray-100'}`;
+                // Estilos de tarjeta moderna (Modo Oscuro)
+                card.className = `bg-gray-800 rounded-3xl shadow-md p-5 relative overflow-hidden transition-all duration-300 ${isWatched ? 'ring-2 ring-green-500 bg-green-900/20' : 'border border-gray-700'}`;
                 
                 card.innerHTML = `
                     <!-- Encabezado de la tarjeta -->
                     <div class="flex justify-between items-center text-xs text-gray-400 font-medium mb-4">
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">Grupo ${match.group}</span>
+                        <span class="bg-gray-700 text-gray-300 px-3 py-1 rounded-full">Grupo ${match.group}</span>
                         <span>🗓️ ${match.date}</span>
                     </div>
                     
                     <!-- Marcadores -->
                     <div class="flex items-center justify-between mb-5">
-                        <div class="flex-1 text-right font-bold text-gray-800 text-base leading-tight pr-2">${match.teamA}</div>
+                        <div class="flex-1 text-right font-bold text-gray-100 text-base leading-tight pr-2">${match.teamA}</div>
                         
-                        <div class="flex items-center gap-2 bg-gray-50 p-1.5 rounded-2xl shadow-inner">
-                            <input type="number" inputmode="numeric" class="w-12 h-12 bg-white text-center rounded-xl text-xl font-black text-blue-900 border-none shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-300 transition-all" 
+                        <div class="flex items-center gap-2 bg-gray-900 p-1.5 rounded-2xl shadow-inner">
+                            <input type="number" inputmode="numeric" class="w-12 h-12 bg-gray-800 text-center rounded-xl text-xl font-black text-blue-400 border-none shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-600 transition-all" 
                                 placeholder="-"
                                 value="${match.scoreA !== '' ? match.scoreA : ''}" 
                                 onchange="updateMatch(${match.id}, 'scoreA', this.value)">
                             
-                            <span class="text-gray-300 font-bold">:</span>
+                            <span class="text-gray-500 font-bold">:</span>
                             
-                            <input type="number" inputmode="numeric" class="w-12 h-12 bg-white text-center rounded-xl text-xl font-black text-blue-900 border-none shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-300 transition-all" 
+                            <input type="number" inputmode="numeric" class="w-12 h-12 bg-gray-800 text-center rounded-xl text-xl font-black text-blue-400 border-none shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-600 transition-all" 
                                 placeholder="-"
                                 value="${match.scoreB !== '' ? match.scoreB : ''}" 
                                 onchange="updateMatch(${match.id}, 'scoreB', this.value)">
                         </div>
                         
-                        <div class="flex-1 text-left font-bold text-gray-800 text-base leading-tight pl-2">${match.teamB}</div>
+                        <div class="flex-1 text-left font-bold text-gray-100 text-base leading-tight pl-2">${match.teamB}</div>
                     </div>
 
                     <!-- Notas y Toggle de Visto -->
                     <div class="flex flex-col gap-3">
                         <div class="flex justify-between items-end px-1">
-                            <label class="text-xs font-bold text-gray-500">Tus Notas</label>
-                            <button onclick="predictMatch(${match.id})" class="text-[10px] font-bold text-purple-700 bg-purple-100 px-3 py-1.5 rounded-full shadow-sm hover:bg-purple-200 active:scale-95 transition-all flex items-center gap-1 uppercase tracking-wider">✨ Predictor IA</button>
+                            <label class="text-xs font-bold text-gray-400">Tus Notas</label>
+                            <button onclick="predictMatch(${match.id})" class="text-[10px] font-bold text-purple-300 bg-purple-900/50 px-3 py-1.5 rounded-full shadow-sm hover:bg-purple-800 active:scale-95 transition-all flex items-center gap-1 uppercase tracking-wider border border-purple-700/50">✨ Predictor IA</button>
                         </div>
-                        <textarea id="notes-${match.id}" class="w-full text-sm bg-gray-50 border border-gray-100 rounded-2xl p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none h-14 transition-all" 
+                        <textarea id="notes-${match.id}" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-2xl p-3 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none h-14 transition-all" 
                             placeholder="Añadir una nota o predicción..."
                             onblur="updateMatch(${match.id}, 'notes', this.value)">${match.notes}</textarea>
                         
-                        <button onclick="toggleWatched(${match.id})" class="w-full py-2.5 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all ${isWatched ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
+                        <button onclick="toggleWatched(${match.id})" class="w-full py-2.5 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all ${isWatched ? 'bg-green-900/40 text-green-400 border border-green-800/50' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}">
                             ${isWatched ? '✅ Partido Visto' : '👁️ Marcar como visto'}
                         </button>
                     </div>
@@ -268,15 +268,15 @@
                 const standings = calculateGroupStandings(groupMatches);
 
                 const tableHTML = `
-                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-2">
-                        <div class="bg-gradient-to-r from-gray-800 to-gray-700 text-white px-5 py-3 font-bold text-sm flex justify-between items-center">
+                    <div class="bg-gray-800 rounded-3xl shadow-md border border-gray-700 overflow-hidden mb-2">
+                        <div class="bg-gradient-to-r from-gray-900 to-gray-800 text-gray-100 px-5 py-3 font-bold text-sm flex justify-between items-center border-b border-gray-700">
                             <span>Grupo ${groupLetter}</span>
-                            <button onclick="analyzeGroup('${groupLetter}')" class="text-[10px] font-bold text-purple-200 bg-purple-900/50 border border-purple-500/30 px-3 py-1 rounded-full hover:bg-purple-800 active:scale-95 transition-all flex items-center gap-1 shadow-inner uppercase tracking-wider">✨ Análisis IA</button>
+                            <button onclick="analyzeGroup('${groupLetter}')" class="text-[10px] font-bold text-purple-300 bg-purple-900/50 border border-purple-700/50 px-3 py-1 rounded-full hover:bg-purple-800 active:scale-95 transition-all flex items-center gap-1 shadow-inner uppercase tracking-wider">✨ Análisis IA</button>
                         </div>
-                        <div id="analysis-${groupLetter}" class="px-5 py-4 text-sm text-gray-700 bg-purple-50/50 hidden border-b border-purple-100/50 shadow-inner leading-relaxed"></div>
+                        <div id="analysis-${groupLetter}" class="px-5 py-4 text-sm text-gray-200 bg-purple-900/20 hidden border-b border-purple-800/30 shadow-inner leading-relaxed"></div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left whitespace-nowrap">
-                                <thead class="bg-gray-50 text-gray-500 text-xs font-bold border-b">
+                                <thead class="bg-gray-900 text-gray-400 text-xs font-bold border-b border-gray-700">
                                     <tr>
                                         <th class="px-4 py-3">País</th>
                                         <th class="px-2 py-3 text-center">PTS</th>
@@ -286,14 +286,14 @@
                                 </thead>
                                 <tbody>
                                     ${standings.map((team, index) => `
-                                        <tr class="border-b border-gray-50 last:border-0 ${index < 2 ? 'bg-green-50/30' : ''}">
-                                            <td class="px-4 py-3.5 font-bold text-gray-800 flex items-center gap-2">
-                                                <span class="text-xs font-bold ${index < 2 ? 'text-green-500' : 'text-gray-300'} w-4">${index + 1}</span> 
+                                        <tr class="border-b border-gray-700 last:border-0 ${index < 2 ? 'bg-green-900/20' : ''}">
+                                            <td class="px-4 py-3.5 font-bold text-gray-200 flex items-center gap-2">
+                                                <span class="text-xs font-bold ${index < 2 ? 'text-green-400' : 'text-gray-500'} w-4">${index + 1}</span> 
                                                 ${team.name}
                                             </td>
-                                            <td class="px-2 py-3.5 text-center font-black text-blue-700">${team.pts}</td>
-                                            <td class="px-2 py-3.5 text-center font-medium text-gray-500">${team.pj}</td>
-                                            <td class="px-2 py-3.5 text-center font-bold ${team.dif > 0 ? 'text-green-500' : team.dif < 0 ? 'text-red-500' : 'text-gray-400'}">
+                                            <td class="px-2 py-3.5 text-center font-black text-blue-400">${team.pts}</td>
+                                            <td class="px-2 py-3.5 text-center font-medium text-gray-400">${team.pj}</td>
+                                            <td class="px-2 py-3.5 text-center font-bold ${team.dif > 0 ? 'text-green-400' : team.dif < 0 ? 'text-red-400' : 'text-gray-500'}">
                                                 ${team.dif > 0 ? '+'+team.dif : team.dif}
                                             </td>
                                         </tr>
@@ -314,9 +314,9 @@
             const btnPartidos = document.getElementById('tab-partidos');
             const btnGrupos = document.getElementById('tab-grupos');
 
-            // Estilos de la Píldora Activa/Inactiva
-            const activeClass = "w-1/2 py-2.5 rounded-full text-sm font-bold bg-blue-100 text-blue-800 shadow-sm transition-all";
-            const inactiveClass = "w-1/2 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:text-blue-600 transition-all bg-transparent shadow-none";
+            // Estilos de la Píldora Activa/Inactiva (Modo Oscuro)
+            const activeClass = "w-1/2 py-2.5 rounded-full text-sm font-bold bg-blue-600 text-white shadow-sm transition-all";
+            const inactiveClass = "w-1/2 py-2.5 rounded-full text-sm font-bold text-gray-400 hover:text-blue-300 transition-all bg-transparent shadow-none";
 
             if(tabId === 'partidos') {
                 btnPartidos.className = activeClass;
@@ -422,7 +422,7 @@
         async function analyzeGroup(groupLetter) {
             const analysisDiv = document.getElementById(`analysis-${groupLetter}`);
             analysisDiv.classList.remove('hidden');
-            analysisDiv.innerHTML = "<div class='flex items-center gap-2 text-purple-700 animate-pulse'><span>✨</span> Analizando el panorama del grupo...</div>";
+            analysisDiv.innerHTML = "<div class='flex items-center gap-2 text-purple-300 animate-pulse'><span>✨</span> Analizando el panorama del grupo...</div>";
 
             const data = getData();
             const groupMatches = data.filter(m => m.group === groupLetter);
@@ -436,9 +436,9 @@
             const result = await callGeminiAPI(prompt, false);
             
             if (result) {
-                analysisDiv.innerHTML = `<strong class="text-purple-800">🗣️ Análisis en cabina:</strong> ${result}`;
+                analysisDiv.innerHTML = `<strong class="text-purple-300">🗣️ Análisis en cabina:</strong> ${result}`;
             } else {
-                analysisDiv.innerHTML = "<span class='text-red-500'>⚠️ No se pudo recibir la señal desde cabina. Inténtalo de nuevo.</span>";
+                analysisDiv.innerHTML = "<span class='text-red-400'>⚠️ No se pudo recibir la señal desde cabina. Inténtalo de nuevo.</span>";
             }
         }
 
