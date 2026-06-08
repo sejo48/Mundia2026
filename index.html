@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Meta viewport ajustado para evitar zoom automático al tocar inputs en móviles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mundial Tracker | Tu Seguimiento Personal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animaciones y ajustes móviles */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: slideFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideFade { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        /* Ocultar flechas de los inputs numéricos */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* Estilo moderno para el scrollbar (si se ve en PC) */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased pb-10">
+
+    <!-- Header Moderno con Gradiente y bordes redondeados abajo -->
+    <header class="bg-gradient-to-br from-blue-800 to-indigo-900 text-white shadow-lg rounded-b-[2rem] pb-10 pt-8 px-4 relative z-10">
+        <div class="max-w-md mx-auto">
+            <h1 class="text-2xl font-extrabold text-center tracking-tight">🏆 Mundial Tracker</h1>
+            <p class="text-blue-200 text-center text-sm mt-1 opacity-90">Tu progreso guardado localmente</p>
+        </div>
+    </header>
+
+    <!-- Navegación estilo "Píldora" (Flotante) -->
+    <div class="max-w-md mx-auto px-4 relative z-20 -mt-7 mb-6">
+        <nav class="bg-white p-1.5 rounded-full shadow-md flex justify-between items-center ring-1 ring-gray-100">
+            <button onclick="switchTab('partidos')" id="tab-partidos" class="w-1/2 py-2.5 rounded-full text-sm font-bold bg-blue-100 text-blue-800 shadow-sm transition-all">📅 Partidos</button>
+            <button onclick="switchTab('grupos')" id="tab-grupos" class="w-1/2 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:text-blue-600 transition-all">📊 Grupos</button>
+        </nav>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="max-w-md mx-auto px-4">
+        
+        <!-- SECCIÓN 1: Calendario -->
+        <section id="partidos" class="tab-content active">
+            <div class="flex justify-between items-center mb-4 px-1">
+                <h2 class="text-xl font-bold text-gray-800">Fase de Grupos</h2>
+                <button onclick="resetData()" class="text-xs font-semibold text-red-500 bg-red-50 px-3 py-1.5 rounded-full hover:bg-red-100 active:scale-95 transition-transform">Borrar todo</button>
+            </div>
+            
+            <!-- Contenedor de Partidos -->
+            <div id="matches-container" class="space-y-4">
+                <!-- Inyectado por JS -->
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: Tablas de Grupos -->
+        <section id="grupos" class="tab-content">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 px-1">Clasificación General</h2>
+            <div id="standings-container" class="space-y-6">
+                <!-- Inyectado por JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- LÓGICA DE LA APLICACIÓN (Vanilla JS) -->
+    <script>
+        const worldCupGroups = {
+            'A': ['México', 'Sudáfrica', 'Corea del Sur', 'Chequia'],
+            'B': ['Canadá', 'Bosnia y Herz.', 'Catar', 'Suiza'],
+            'C': ['Brasil', 'Marruecos', 'Haití', 'Escocia'],
+            'D': ['EE. UU.', 'Paraguay', 'Australia', 'Turquía'],
+            'E': ['Alemania', 'Curazao', 'Costa de Marfil', 'Ecuador'],
+            'F': ['Países Bajos', 'Japón', 'Suecia', 'Túnez'],
+            'G': ['Bélgica', 'Egipto', 'Irán', 'Nueva Zelanda'],
+            'H': ['España', 'Cabo Verde', 'Arabia Saudí', 'Uruguay'],
+            'I': ['Francia', 'Senegal', 'Irak', 'Noruega'],
+            'J': ['Argentina', 'Argelia', 'Austria', 'Jordania'],
+            'K': ['Portugal', 'RD Congo', 'Uzbekistán', 'Colombia'],
+            'L': ['Inglaterra', 'Croacia', 'Ghana', 'Panamá']
+        };
+
+        const initialData = [];
+        let matchId = 1;
+
+        const startDate = new Date(2026, 5, 11);
+        const crTimeSlots = ['10:00 AM', '01:00 PM', '04:00 PM', '07:00 PM'];
+        let currentDayOffset = 0;
+        let matchCounter = 0;
+
+        for (const [group, teams] of Object.entries(worldCupGroups)) {
+            const matchups = [[0, 1], [2, 3], [0, 2], [3, 1], [3, 0], [1, 2]];
+            
+            matchups.forEach(pair => {
+                let matchDate = new Date(startDate);
+                matchDate.setDate(startDate.getDate() + currentDayOffset);
+                let dateStr = matchDate.toLocaleDateString('es-CR', { day: 'numeric', month: 'short' });
+                let timeStr = crTimeSlots[matchCounter % 4];
+
+                initialData.push({
+                    id: matchId++,
+                    group: group,
+                    teamA: teams[pair[0]],
+                    teamB: teams[pair[1]],
+                    scoreA: '',
+                    scoreB: '',
+                    date: `${dateStr} • ${timeStr}`,
+                    watched: false,
+                    notes: ''
+                });
+
+                matchCounter++;
+                if (matchCounter % 4 === 0) currentDayOffset++;
+            });
+        }
+
+        const STORAGE_KEY = 'jorge_worldcup_2026_mobile';
+
+        function getData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(initialData));
+        }
+
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function resetData() {
+            if(confirm('¿Seguro que quieres borrar todos tus marcadores?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                init();
+            }
+        }
+
+        function updateMatch(id, field, value) {
+            const data = getData();
+            const matchIndex = data.findIndex(m => m.id === id);
+            if (matchIndex > -1) {
+                if (field === 'scoreA' || field === 'scoreB') {
+                    data[matchIndex][field] = value === '' ? '' : parseInt(value, 10);
+                } else {
+                    data[matchIndex][field] = value;
+                }
+                saveData(data);
+                
+                if (field === 'scoreA' || field === 'scoreB') {
+                    renderStandings();
+                }
+            }
+        }
+
+        function toggleWatched(id) {
+            const data = getData();
+            const match = data.find(m => m.id === id);
+            if(match) {
+                updateMatch(id, 'watched', !match.watched);
+                renderMatches();
+            }
+        }
+
+        function renderMatches() {
+            const container = document.getElementById('matches-container');
+            const data = getData();
+            container.innerHTML = '';
+
+            data.forEach(match => {
+                const isWatched = match.watched;
+                const card = document.createElement('div');
+                // Estilos de tarjeta moderna
+                card.className = `bg-white rounded-3xl shadow-sm p-5 relative overflow-hidden transition-all duration-300 ${isWatched ? 'ring-2 ring-green-400 bg-green-50/20' : 'border border-gray-100'}`;
+                
+                card.innerHTML = `
+                    <!-- Encabezado de la tarjeta -->
+                    <div class="flex justify-between items-center text-xs text-gray-400 font-medium mb-4">
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">Grupo ${match.group}</span>
+                        <span>🗓️ ${match.date}</span>
+                    </div>
+                    
+                    <!-- Marcadores -->
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex-1 text-right font-bold text-gray-800 text-base leading-tight pr-2">${match.teamA}</div>
+                        
+                        <div class="flex items-center gap-2 bg-gray-50 p-1.5 rounded-2xl shadow-inner">
+                            <input type="number" inputmode="numeric" class="w-12 h-12 bg-white text-center rounded-xl text-xl font-black text-blue-900 border-none shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-300 transition-all" 
+                                placeholder="-"
+                                value="${match.scoreA !== '' ? match.scoreA : ''}" 
+                                onchange="updateMatch(${match.id}, 'scoreA', this.value)">
+                            
+                            <span class="text-gray-300 font-bold">:</span>
+                            
+                            <input type="number" inputmode="numeric" class="w-12 h-12 bg-white text-center rounded-xl text-xl font-black text-blue-900 border-none shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-300 transition-all" 
+                                placeholder="-"
+                                value="${match.scoreB !== '' ? match.scoreB : ''}" 
+                                onchange="updateMatch(${match.id}, 'scoreB', this.value)">
+                        </div>
+                        
+                        <div class="flex-1 text-left font-bold text-gray-800 text-base leading-tight pl-2">${match.teamB}</div>
+                    </div>
+
+                    <!-- Notas y Toggle de Visto -->
+                    <div class="flex flex-col gap-3">
+                        <div class="flex justify-between items-end px-1">
+                            <label class="text-xs font-bold text-gray-500">Tus Notas</label>
+                            <button onclick="predictMatch(${match.id})" class="text-[10px] font-bold text-purple-700 bg-purple-100 px-3 py-1.5 rounded-full shadow-sm hover:bg-purple-200 active:scale-95 transition-all flex items-center gap-1 uppercase tracking-wider">✨ Predictor IA</button>
+                        </div>
+                        <textarea id="notes-${match.id}" class="w-full text-sm bg-gray-50 border border-gray-100 rounded-2xl p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none h-14 transition-all" 
+                            placeholder="Añadir una nota o predicción..."
+                            onblur="updateMatch(${match.id}, 'notes', this.value)">${match.notes}</textarea>
+                        
+                        <button onclick="toggleWatched(${match.id})" class="w-full py-2.5 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all ${isWatched ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
+                            ${isWatched ? '✅ Partido Visto' : '👁️ Marcar como visto'}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function calculateGroupStandings(groupMatches) {
+            const teams = {};
+            groupMatches.forEach(m => {
+                if (!teams[m.teamA]) teams[m.teamA] = { name: m.teamA, pts: 0, pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0, dif: 0 };
+                if (!teams[m.teamB]) teams[m.teamB] = { name: m.teamB, pts: 0, pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0, dif: 0 };
+            });
+
+            groupMatches.forEach(m => {
+                if (m.scoreA !== '' && m.scoreB !== '') {
+                    const sa = parseInt(m.scoreA);
+                    const sb = parseInt(m.scoreB);
+                    const ta = teams[m.teamA];
+                    const tb = teams[m.teamB];
+
+                    ta.pj++; tb.pj++;
+                    ta.gf += sa; ta.gc += sb;
+                    tb.gf += sb; tb.gc += sa;
+
+                    if (sa > sb) { ta.pts += 3; ta.g++; tb.p++; } 
+                    else if (sa < sb) { tb.pts += 3; tb.g++; ta.p++; } 
+                    else { ta.pts += 1; tb.pts += 1; ta.e++; tb.e++; }
+                }
+            });
+
+            const standings = Object.values(teams).map(t => { t.dif = t.gf - t.gc; return t; });
+            standings.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.dif !== a.dif) return b.dif - a.dif;
+                return b.gf - a.gf;
+            });
+            return standings;
+        }
+
+        function renderStandings() {
+            const container = document.getElementById('standings-container');
+            const data = getData();
+            container.innerHTML = '';
+
+            const groups = [...new Set(data.map(m => m.group))].sort();
+
+            groups.forEach(groupLetter => {
+                const groupMatches = data.filter(m => m.group === groupLetter);
+                const standings = calculateGroupStandings(groupMatches);
+
+                const tableHTML = `
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-2">
+                        <div class="bg-gradient-to-r from-gray-800 to-gray-700 text-white px-5 py-3 font-bold text-sm flex justify-between items-center">
+                            <span>Grupo ${groupLetter}</span>
+                            <button onclick="analyzeGroup('${groupLetter}')" class="text-[10px] font-bold text-purple-200 bg-purple-900/50 border border-purple-500/30 px-3 py-1 rounded-full hover:bg-purple-800 active:scale-95 transition-all flex items-center gap-1 shadow-inner uppercase tracking-wider">✨ Análisis IA</button>
+                        </div>
+                        <div id="analysis-${groupLetter}" class="px-5 py-4 text-sm text-gray-700 bg-purple-50/50 hidden border-b border-purple-100/50 shadow-inner leading-relaxed"></div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left whitespace-nowrap">
+                                <thead class="bg-gray-50 text-gray-500 text-xs font-bold border-b">
+                                    <tr>
+                                        <th class="px-4 py-3">País</th>
+                                        <th class="px-2 py-3 text-center">PTS</th>
+                                        <th class="px-2 py-3 text-center">PJ</th>
+                                        <th class="px-2 py-3 text-center">DIF</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${standings.map((team, index) => `
+                                        <tr class="border-b border-gray-50 last:border-0 ${index < 2 ? 'bg-green-50/30' : ''}">
+                                            <td class="px-4 py-3.5 font-bold text-gray-800 flex items-center gap-2">
+                                                <span class="text-xs font-bold ${index < 2 ? 'text-green-500' : 'text-gray-300'} w-4">${index + 1}</span> 
+                                                ${team.name}
+                                            </td>
+                                            <td class="px-2 py-3.5 text-center font-black text-blue-700">${team.pts}</td>
+                                            <td class="px-2 py-3.5 text-center font-medium text-gray-500">${team.pj}</td>
+                                            <td class="px-2 py-3.5 text-center font-bold ${team.dif > 0 ? 'text-green-500' : team.dif < 0 ? 'text-red-500' : 'text-gray-400'}">
+                                                ${team.dif > 0 ? '+'+team.dif : team.dif}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += tableHTML;
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            const btnPartidos = document.getElementById('tab-partidos');
+            const btnGrupos = document.getElementById('tab-grupos');
+
+            // Estilos de la Píldora Activa/Inactiva
+            const activeClass = "w-1/2 py-2.5 rounded-full text-sm font-bold bg-blue-100 text-blue-800 shadow-sm transition-all";
+            const inactiveClass = "w-1/2 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:text-blue-600 transition-all bg-transparent shadow-none";
+
+            if(tabId === 'partidos') {
+                btnPartidos.className = activeClass;
+                btnGrupos.className = inactiveClass;
+                renderMatches();
+            } else {
+                btnGrupos.className = activeClass;
+                btnPartidos.className = inactiveClass;
+                renderStandings(); 
+            }
+        }
+
+        function init() {
+            renderMatches();
+            renderStandings();
+        }
+
+        // --- GEMINI API INTEGRATION ---
+        const apiKey = ""; // La clave de API es inyectada por el entorno de forma automática
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        // Función base para comunicarse con Gemini con reintentos automáticos
+        async function callGeminiAPI(prompt, isJSON = false) {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: "Eres un apasionado comentarista deportivo experto en el Mundial de Fútbol." }] }
+            };
+
+            if (isJSON) {
+                payload.generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            scoreA: { type: "INTEGER" },
+                            scoreB: { type: "INTEGER" },
+                            analysis: { type: "STRING" }
+                        }
+                    }
+                };
+            }
+
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            
+            for (let attempt = 0; attempt < 6; attempt++) {
+                try {
+                    const response = await fetch(geminiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    let textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (!textResult) throw new Error("Respuesta vacía de la IA");
+                    
+                    if (isJSON) {
+                        return JSON.parse(textResult);
+                    }
+                    return textResult;
+
+                } catch (error) {
+                    if (attempt < 5) {
+                        await new Promise(res => setTimeout(res, delays[attempt]));
+                    } else {
+                        console.error("Error definitivo al llamar a Gemini:", error);
+                        return null;
+                    }
+                }
+            }
+        }
+
+        // Función para predecir marcadores
+        async function predictMatch(id) {
+            const data = getData();
+            const match = data.find(m => m.id === id);
+            if (!match) return;
+
+            const textarea = document.getElementById(`notes-${id}`);
+            if (textarea) textarea.value = "Consultando a los oráculos del fútbol... ✨⚽";
+
+            const prompt = `Analiza un posible partido del Mundial 2026 entre ${match.teamA} y ${match.teamB}. Haz una predicción de goles realista basada en su historia y su nivel actual. Genera también una breve línea de justificación dramática (ej. "La velocidad de sus extremos marcará la diferencia").`;
+            
+            const result = await callGeminiAPI(prompt, true);
+            
+            if (result && result.scoreA !== undefined && result.scoreB !== undefined) {
+                updateMatch(id, 'scoreA', result.scoreA);
+                updateMatch(id, 'scoreB', result.scoreB);
+                updateMatch(id, 'notes', `✨ Predicción IA: ${result.analysis}`);
+                
+                // Actualizar la interfaz con los nuevos datos
+                renderMatches();
+                renderStandings(); 
+            } else {
+                if (textarea) textarea.value = "⚠️ La conexión con la IA falló en este momento. Intenta de nuevo.";
+            }
+        }
+
+        // Función para analizar y narrar grupos
+        async function analyzeGroup(groupLetter) {
+            const analysisDiv = document.getElementById(`analysis-${groupLetter}`);
+            analysisDiv.classList.remove('hidden');
+            analysisDiv.innerHTML = "<div class='flex items-center gap-2 text-purple-700 animate-pulse'><span>✨</span> Analizando el panorama del grupo...</div>";
+
+            const data = getData();
+            const groupMatches = data.filter(m => m.group === groupLetter);
+            const standings = calculateGroupStandings(groupMatches);
+            
+            // Convertir la tabla en texto comprensible para la IA
+            const standingsText = standings.map((t, i) => `${i+1}º ${t.name} (Pts: ${t.pts}, Goles Dif: ${t.dif})`).join(" | ");
+            
+            const prompt = `Aquí está la tabla de posiciones actual del Grupo ${groupLetter} del Mundial: [ ${standingsText} ]. Escribe un comentario deportivo corto y muy dramático (máximo 3 oraciones) describiendo la situación. ¿Quién lidera firmemente? ¿Quién está contra las cuerdas o cerca de la eliminación? Usa un tono emocionante como el de la televisión.`;
+
+            const result = await callGeminiAPI(prompt, false);
+            
+            if (result) {
+                analysisDiv.innerHTML = `<strong class="text-purple-800">🗣️ Análisis en cabina:</strong> ${result}`;
+            } else {
+                analysisDiv.innerHTML = "<span class='text-red-500'>⚠️ No se pudo recibir la señal desde cabina. Inténtalo de nuevo.</span>";
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
