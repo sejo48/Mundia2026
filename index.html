@@ -28,11 +28,16 @@
 <body class="bg-gray-900 text-gray-200 font-sans antialiased pb-10">
 
     <!-- Header Moderno con Gradiente y bordes redondeados abajo -->
-    <header class="bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-lg rounded-b-[2rem] pb-10 pt-8 px-4 relative z-10">
+    <header class="bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-lg rounded-b-[2rem] pb-10 pt-8 px-4 relative z-10 text-center">
         <div class="max-w-md mx-auto">
-            <h1 class="text-2xl font-extrabold text-center tracking-tight">🏆 Mundial Tracker</h1>
-            <p class="text-blue-300 text-center text-xs mt-2 font-semibold tracking-wide">Aplicación creada por Jorge Hernández © 2026</p>
-            <p class="text-blue-200/60 text-center text-[11px] mt-1">Tu progreso se guarda localmente</p>
+            <h1 class="text-2xl font-extrabold tracking-tight">🏆 Mundial Tracker</h1>
+            <p class="text-blue-300 text-xs mt-2 font-semibold tracking-wide">Aplicación creada por Jorge Hernández © 2026</p>
+            <p class="text-blue-200/60 text-[11px] mt-1">Tu progreso se guarda localmente</p>
+            
+            <!-- NUEVO: Cuenta Regresiva -->
+            <div id="countdown" class="mt-4 bg-gray-900/40 rounded-full py-1.5 px-5 inline-block text-sm font-bold text-yellow-400 border border-blue-700/50 shadow-inner backdrop-blur-sm">
+                ⏳ Calculando tiempo...
+            </div>
         </div>
     </header>
 
@@ -65,6 +70,14 @@
             <h2 class="text-xl font-bold text-gray-100 mb-4 px-1">Clasificación General</h2>
             <div id="standings-container" class="space-y-6">
                 <!-- Inyectado por JS -->
+            </div>
+            
+            <!-- NUEVO: Botón de Compartir en WhatsApp -->
+            <div class="mt-8 mb-4 text-center">
+                <button onclick="shareWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 border border-[#1da850]">
+                    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    Compartir mis pronósticos
+                </button>
             </div>
         </section>
 
@@ -132,7 +145,6 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
-        // Función de reseteo con PIN de seguridad
         function resetData() {
             const pin = prompt('Introduce la clave de seguridad para borrar todo:');
             if (pin === '8384') {
@@ -179,17 +191,14 @@
             data.forEach(match => {
                 const isWatched = match.watched;
                 const card = document.createElement('div');
-                // Estilos de tarjeta moderna (Modo Oscuro)
                 card.className = `bg-gray-800 rounded-3xl shadow-md p-5 relative overflow-hidden transition-all duration-300 ${isWatched ? 'ring-2 ring-green-500 bg-green-900/20' : 'border border-gray-700'}`;
                 
                 card.innerHTML = `
-                    <!-- Encabezado de la tarjeta -->
                     <div class="flex justify-between items-center text-xs text-gray-400 font-medium mb-4">
                         <span class="bg-gray-700 text-gray-300 px-3 py-1 rounded-full">Grupo ${match.group}</span>
                         <span>🗓️ ${match.date}</span>
                     </div>
                     
-                    <!-- Marcadores -->
                     <div class="flex items-center justify-between mb-5">
                         <div class="flex-1 text-right font-bold text-gray-100 text-base leading-tight pr-2">${match.teamA}</div>
                         
@@ -210,7 +219,6 @@
                         <div class="flex-1 text-left font-bold text-gray-100 text-base leading-tight pl-2">${match.teamB}</div>
                     </div>
 
-                    <!-- Notas y Toggle de Visto -->
                     <div class="flex flex-col gap-3">
                         <div class="flex justify-between items-end px-1">
                             <label class="text-xs font-bold text-gray-400">Tus Notas</label>
@@ -320,7 +328,6 @@
             const btnPartidos = document.getElementById('tab-partidos');
             const btnGrupos = document.getElementById('tab-grupos');
 
-            // Estilos de la Píldora Activa/Inactiva (Modo Oscuro)
             const activeClass = "w-1/2 py-2.5 rounded-full text-sm font-bold bg-blue-600 text-white shadow-sm transition-all";
             const inactiveClass = "w-1/2 py-2.5 rounded-full text-sm font-bold text-gray-400 hover:text-blue-300 transition-all bg-transparent shadow-none";
 
@@ -335,10 +342,63 @@
             }
         }
 
-        const apiKey = ""; // La clave de API es inyectada por el entorno de forma automática
+        // NUEVO: Función para inicializar la cuenta regresiva
+        function initCountdown() {
+            // El partido inaugural es el 11 de junio a las 10:00 AM hora CR
+            const openingMatch = new Date(2026, 5, 11, 10, 0, 0); 
+            
+            const updateTimer = () => {
+                const now = new Date();
+                const diff = openingMatch - now;
+                const el = document.getElementById('countdown');
+                
+                if (diff <= 0) {
+                    el.innerHTML = "⚽ ¡EL MUNDIAL HA COMENZADO! 🏆";
+                    el.classList.replace('text-yellow-400', 'text-green-400');
+                    return;
+                }
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                
+                if (days > 0) {
+                    el.innerHTML = `⏳ Faltan ${days} días y ${hours} hrs para el inicio`;
+                } else if (hours > 0) {
+                    el.innerHTML = `⏳ ¡Hoy empieza! Faltan ${hours} horas`;
+                } else {
+                    el.innerHTML = `⏳ ¡A punto de comenzar!`;
+                }
+            };
+            
+            updateTimer();
+            setInterval(updateTimer, 1000 * 60 * 60); // Actualizar cada hora
+        }
+
+        // NUEVO: Función para generar texto y enviar a WhatsApp
+        function shareWhatsApp() {
+            const data = getData();
+            let text = "🏆 *Mis clasificados del Mundial 2026* (App de Jorge Hernández)\n\n";
+            
+            const groups = [...new Set(data.map(m => m.group))].sort();
+            
+            groups.forEach(groupLetter => {
+                const groupMatches = data.filter(m => m.group === groupLetter);
+                const standings = calculateGroupStandings(groupMatches);
+                
+                // Añadir solo a los 2 primeros (los que clasifican)
+                text += `*Grupo ${groupLetter}:*\n1️⃣ ${standings[0].name} (${standings[0].pts} pts)\n2️⃣ ${standings[1].name} (${standings[1].pts} pts)\n\n`;
+            });
+            
+            text += "¡Haz tus pronósticos tú también! ⚽";
+            
+            // Crear el link de WhatsApp
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        const apiKey = ""; 
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-        // Función base para comunicarse con Gemini con reintentos automáticos
         async function callGeminiAPI(prompt, isJSON = false) {
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
@@ -392,7 +452,6 @@
             }
         }
 
-        // Función para predecir marcadores
         async function predictMatch(id) {
             const data = getData();
             const match = data.find(m => m.id === id);
@@ -410,7 +469,6 @@
                 updateMatch(id, 'scoreB', result.scoreB);
                 updateMatch(id, 'notes', `✨ Predicción IA: ${result.analysis}`);
                 
-                // Actualizar la interfaz con los nuevos datos
                 renderMatches();
                 renderStandings(); 
             } else {
@@ -418,7 +476,6 @@
             }
         }
 
-        // Función para analizar y narrar grupos
         async function analyzeGroup(groupLetter) {
             const analysisDiv = document.getElementById(`analysis-${groupLetter}`);
             analysisDiv.classList.remove('hidden');
@@ -428,7 +485,6 @@
             const groupMatches = data.filter(m => m.group === groupLetter);
             const standings = calculateGroupStandings(groupMatches);
             
-            // Convertir la tabla en texto comprensible para la IA
             const standingsText = standings.map((t, i) => `${i+1}º ${t.name} (Pts: ${t.pts}, Goles Dif: ${t.dif})`).join(" | ");
             
             const prompt = `Aquí está la tabla de posiciones actual del Grupo ${groupLetter} del Mundial: [ ${standingsText} ]. Escribe un comentario deportivo corto y muy dramático (máximo 3 oraciones) describiendo la situación. ¿Quién lidera firmemente? ¿Quién está contra las cuerdas o cerca de la eliminación? Usa un tono emocionante como el de la televisión.`;
@@ -445,6 +501,7 @@
         function init() {
             renderMatches();
             renderStandings();
+            initCountdown(); // Iniciar cuenta regresiva al cargar
         }
 
         window.onload = init;
