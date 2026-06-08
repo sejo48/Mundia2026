@@ -7,7 +7,6 @@
     <title>Mundial Tracker | Tu Seguimiento Personal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Animaciones y ajustes móviles */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: slideFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideFade { 
@@ -23,7 +22,7 @@
         /* Estilo moderno para el scrollbar (si se ve en PC) */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 font-sans antialiased pb-10">
@@ -32,7 +31,8 @@
     <header class="bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-lg rounded-b-[2rem] pb-10 pt-8 px-4 relative z-10">
         <div class="max-w-md mx-auto">
             <h1 class="text-2xl font-extrabold text-center tracking-tight">🏆 Mundial Tracker</h1>
-            <p class="text-blue-200 text-center text-sm mt-1 opacity-90">Tu progreso guardado localmente</p>
+            <p class="text-blue-300 text-center text-xs mt-2 font-semibold tracking-wide">Aplicación creada por Jorge Hernández © 2026</p>
+            <p class="text-blue-200/60 text-center text-[11px] mt-1">Tu progreso se guarda localmente</p>
         </div>
     </header>
 
@@ -121,7 +121,7 @@
             });
         }
 
-        const STORAGE_KEY = 'jorge_worldcup_2026_mobile';
+        const STORAGE_KEY = 'jorge_worldcup_2026_final';
 
         function getData() {
             const stored = localStorage.getItem(STORAGE_KEY);
@@ -132,10 +132,16 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
+        // Función de reseteo con PIN de seguridad
         function resetData() {
-            if(confirm('¿Seguro que quieres borrar todos tus marcadores?')) {
-                localStorage.removeItem(STORAGE_KEY);
-                init();
+            const pin = prompt('Introduce la clave de seguridad para borrar todo:');
+            if (pin === '8384') {
+                if(confirm('¿Seguro que quieres borrar todos tus marcadores? Esta acción no se puede deshacer.')) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    init();
+                }
+            } else if (pin !== null) {
+                alert('Clave incorrecta. No se han borrado los datos.');
             }
         }
 
@@ -329,12 +335,6 @@
             }
         }
 
-        function init() {
-            renderMatches();
-            renderStandings();
-        }
-
-        // --- GEMINI API INTEGRATION ---
         const apiKey = ""; // La clave de API es inyectada por el entorno de forma automática
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
@@ -440,6 +440,11 @@
             } else {
                 analysisDiv.innerHTML = "<span class='text-red-400'>⚠️ No se pudo recibir la señal desde cabina. Inténtalo de nuevo.</span>";
             }
+        }
+
+        function init() {
+            renderMatches();
+            renderStandings();
         }
 
         window.onload = init;
