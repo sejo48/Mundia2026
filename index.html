@@ -135,15 +135,19 @@
         }
 
         // --- PRECARGAR RESULTADOS REALES (11 y 12 de Junio) ---
+        // Aquí están los resultados oficiales de los primeros dos días del Mundial
         const resultadosOficiales = [
             { teamA: 'México', teamB: 'Sudáfrica', scoreA: 2, scoreB: 0 },
-            { teamA: 'Corea del Sur', teamB: 'Chequia', scoreA: 2, scoreB: 1 },
+            { teamA: 'Corea del Sur', teamB: 'República Checa', scoreA: 2, scoreB: 1 }, // Chequia aparece a veces como República Checa en los datos
+            { teamA: 'Corea del Sur', teamB: 'Chequia', scoreA: 2, scoreB: 1 },         // Agregamos ambas variaciones por si acaso
             { teamA: 'Canadá', teamB: 'Bosnia y Herz.', scoreA: 1, scoreB: 1 },
             { teamA: 'EE. UU.', teamB: 'Paraguay', scoreA: 4, scoreB: 1 }
         ];
 
+        // Recorremos los datos iniciales y sobreescribimos con los resultados reales
         initialData.forEach(match => {
             resultadosOficiales.forEach(res => {
+                // Buscamos coincidencia exacta de los equipos, sin importar el orden (Local o Visitante)
                 if (match.teamA === res.teamA && match.teamB === res.teamB) {
                     match.scoreA = res.scoreA;
                     match.scoreB = res.scoreB;
@@ -158,7 +162,7 @@
             });
         });
 
-        const STORAGE_KEY = 'jorge_worldcup_2026_live_v1';
+        const STORAGE_KEY = 'jorge_worldcup_2026_live_v2'; // Cambié la clave para forzar el reinicio con los datos correctos
 
         function getData() {
             const stored = localStorage.getItem(STORAGE_KEY);
