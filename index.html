@@ -56,7 +56,10 @@
         <section id="partidos" class="tab-content active">
             <div class="flex justify-between items-center mb-4 px-1">
                 <h2 class="text-xl font-bold text-gray-100">Fase de Grupos</h2>
-                <button onclick="resetData()" class="text-xs font-semibold text-red-400 bg-red-900/30 px-3 py-1.5 rounded-full hover:bg-red-900/50 active:scale-95 transition-transform">Borrar todo</button>
+                <div class="flex gap-2">
+                    <button onclick="simulateAll()" class="text-[11px] font-bold text-blue-300 bg-blue-900/40 px-3 py-1.5 rounded-full hover:bg-blue-800 active:scale-95 transition-transform border border-blue-700/50">🎲 Auto-Completar</button>
+                    <button onclick="resetData()" class="text-[11px] font-bold text-red-400 bg-red-900/30 px-3 py-1.5 rounded-full hover:bg-red-900/50 active:scale-95 transition-transform">Borrar todo</button>
+                </div>
             </div>
             
             <!-- Contenedor de Partidos -->
@@ -68,6 +71,12 @@
         <!-- SECCIÓN 2: Tablas de Grupos -->
         <section id="grupos" class="tab-content">
             <h2 class="text-xl font-bold text-gray-100 mb-4 px-1">Clasificación General</h2>
+            
+            <!-- NUEVA DINÁMICA: Panel de Estadísticas Globales -->
+            <div id="global-stats-panel" class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-4 mb-6 shadow-md border border-gray-700 flex justify-around text-center">
+                <!-- Se inyecta por JS -->
+            </div>
+
             <div id="standings-container" class="space-y-6">
                 <!-- Inyectado por JS -->
             </div>
@@ -162,7 +171,8 @@
             });
         });
 
-        const STORAGE_KEY = 'jorge_worldcup_2026_live_v2'; // Cambié la clave para forzar el reinicio con los datos correctos
+        // NUEVA CLAVE: Esto asegura que el error de Corea se borre y cargue los datos frescos.
+        const STORAGE_KEY = 'jorge_worldcup_2026_live_v4_stats'; 
 
         function getData() {
             const stored = localStorage.getItem(STORAGE_KEY);
@@ -200,6 +210,71 @@
                     renderStandings();
                 }
             }
+        }
+
+        // NUEVA DINÁMICA 1: Simular resultados aleatorios lógicos
+        function simulateAll() {
+            if(!confirm('¿Quieres que la app genere resultados simulados al azar para todos los partidos vacíos?')) return;
+            
+            const data = getData();
+            data.forEach(match => {
+                if(match.scoreA === '' && match.scoreB === '') {
+                    // Generar goles aleatorios (tendencia a marcadores de 0 a 3)
+                    match.scoreA = Math.floor(Math.random() * 4);
+                    match.scoreB = Math.floor(Math.random() * 4);
+                    match.notes = "🎲 Partido Simulado";
+                }
+            });
+            saveData(data);
+            renderMatches();
+            renderStandings();
+        }
+
+        // NUEVA DINÁMICA 2: Actualizar métricas del torneo
+        function updateGlobalStats() {
+            const panel = document.getElementById('global-stats-panel');
+            if(!panel) return;
+            
+            const data = getData();
+            let totalGoals = 0;
+            let playedMatches = 0;
+            const teamGoals = {};
+
+            data.forEach(m => {
+                if (m.scoreA !== '' && m.scoreB !== '') {
+                    playedMatches++;
+                    totalGoals += parseInt(m.scoreA) + parseInt(m.scoreB);
+                    teamGoals[m.teamA] = (teamGoals[m.teamA] || 0) + parseInt(m.scoreA);
+                    teamGoals[m.teamB] = (teamGoals[m.teamB] || 0) + parseInt(m.scoreB);
+                }
+            });
+
+            // Buscar equipo más goleador
+            let topScorer = "-";
+            let maxGoals = 0;
+            for (const [team, goals] of Object.entries(teamGoals)) {
+                if (goals > maxGoals) {
+                    maxGoals = goals;
+                    topScorer = team;
+                }
+            }
+
+            const avgGoals = playedMatches === 0 ? "0.0" : (totalGoals / playedMatches).toFixed(1);
+
+            panel.innerHTML = `
+                <div>
+                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">Goles Totales</p>
+                    <p class="text-2xl font-black text-white">${totalGoals}</p>
+                </div>
+                <div class="border-l border-gray-700 pl-4">
+                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">Promedio</p>
+                    <p class="text-2xl font-black text-blue-400">${avgGoals}</p>
+                </div>
+                <div class="border-l border-gray-700 pl-4">
+                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">Equipo Goleador</p>
+                    <p class="text-lg font-bold text-green-400 truncate w-24 mx-auto" title="${topScorer}">${topScorer}</p>
+                </div>
+            `;
         }
 
         function toggleWatched(id) {
@@ -302,6 +377,9 @@
             const container = document.getElementById('standings-container');
             const data = getData();
             container.innerHTML = '';
+
+            // Refrescar las estadísticas globales cada vez que se carga la tabla
+            updateGlobalStats();
 
             const groups = [...new Set(data.map(m => m.group))].sort();
 
